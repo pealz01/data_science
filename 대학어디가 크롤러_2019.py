@@ -122,7 +122,7 @@ if __name__=='__main__':
     driver.get('https://www.adiga.kr/')
     
     #그냥 손으로 로그인하기 / 키보드 보안 프로그램 때문에 send_keys 메소드 안먹음 자동 로그인 포기
-    input("▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒직접 로그인 한 이후 아무 키나 입력▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒")
+    input("----------------------------------------직접 로그인 한 이후 아무 키나 입력----------------------------------------")
     
     #검색창으로 이동
     driver.get('https://www.adiga.kr/PageLinkAll.do?link=/kcue/ast/eip/eis/inf/sjinf/eipSjinfGnrl.do&p_menu_id=PG-EIP-05101')
@@ -151,7 +151,7 @@ if __name__=='__main__':
                     err+=tmp2
                     
                 flg = get_next_page()
-                print('▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒{}페이지 완료▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒'.format(page))
+                print('----------------------------------------{}페이지 완료----------------------------------------'.format(page))
                 page+=1
                 element = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, "[class='btn_result']")))
                 break
@@ -164,7 +164,7 @@ if __name__=='__main__':
                     page+=1
                 else:
                     pass_y_n = ''
-                    print('▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒{0}페이지 {1}차 시도{2}▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒'.format(page, i, pass_y_n))
+                    print('----------------------------------------{0}페이지 {1}차 시도{2}----------------------------------------'.format(page, i, pass_y_n))
                     time.sleep(1)
                 pass
             
@@ -190,4 +190,4 @@ if __name__=='__main__':
     df3.to_excel(writer, sheet_name="오류페이지",index=False)
     writer.save()
     
-    print('▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒{0} mins - {1} to {2}▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒'.format((time.time()-start_time)/60),start_time,time.time())
+    print('----------------------------{0} mins - {1} to {2}----------------------------'.format((time.time()-start_time)/60),start_time,time.time())
