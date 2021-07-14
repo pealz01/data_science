@@ -56,25 +56,9 @@ class get_perspective_scan:
                 # 원근 변환 적용
                 self.result = cv2.warpPerspective(self.img, mtrx, (int(width), int(height)))
                 cv2.destroyWindow(self.win_name)
-                #cv2.imshow('scanned', self.result)
-                #cv2.waitKey(0)
-                #cv2.destroyAllWindows()
 
     def callback(self,):
         cv2.setMouseCallback(self.win_name, self.onMouse)  # 마우스 콜백 함수를 GUI 윈도우에 등록 ---④
-        #cv2.imshow("scaned", self.result)
-        #self.result = cv2.resize(self.result,(w,h))
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-
-if __name__=='__main__':
-    img_path = '성적표경로입력'
-    img = cv2.imread('imgs/{}'.format(img_path))
-    tmp = get_perspective_scan(img)
-    tmp.callback()
-    samp_table_path = 'imgs/samp_table.png'
-    img_samp = cv2.imread(samp_table_path)
-    h, w, c = img_samp.shape
-    tmp.result = cv2.resize(tmp.result,(w, h))
-
 
