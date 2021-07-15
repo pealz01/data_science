@@ -1,7 +1,6 @@
 import cv2
 import sys
 import numpy as np
-from pytesseract import Output
 import pytesseract
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
@@ -19,6 +18,7 @@ def get_table(img):
         tmp = get_perspective_scan(img)
         tmp.callback()
         tmp.result = cv2.resize(tmp.result, (899, 337))
+        cv2.imwrite("imgs/table.png", tmp.result)
         #cv2.destroyAllWindows()
         return tmp.result
 
@@ -94,7 +94,7 @@ def back_rm(img):
 
 if __name__=='__main__':
     mydata=[]
-    path ='img/samp_img.png'
+    path ='imgs/89d42daa-1ae8-49e2-9680-ea4750fc1c29'
     img = cv2.imread(path)
     imgtbl = get_table(img)
     imgtbl_trash = back_rm(imgtbl)
@@ -109,7 +109,8 @@ if __name__=='__main__':
         imgshow = cv2.addWeighted(imgshow,0.99,imgmask,0.1,0)
 
         if r[3][-3:] in ['grd','sig','100']:
-            lang_opt = 'eng'
+            lang_opt = 'digits'
+            #
             config_opt = '--psm 6 --oem 1 -c tessedit_char_whitelist={}123456789'.format('' if r[3][-3:] == 'grd' else 0)
             #config_opt = r'--oem 1 --psm 6 outputbase digits'
         else:
@@ -122,7 +123,7 @@ if __name__=='__main__':
 
         #지정된 박스 영역 내 세로줄 없애기
         thresh = cv2.threshold(imgcopy, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 5))
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 3))
         opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
 
         cnts = cv2.findContours(opening, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -132,6 +133,8 @@ if __name__=='__main__':
             if area < 500:
                 cv2.drawContours(opening, [c], -1, (0, 0, 0), -1)
         result = cv2.bitwise_xor(imgcrop, opening)
+
+        cv2.imwrite("imgs/imgcrop_{}.png".format(x), result)
 
         txt = pytesseract.image_to_string(result,lang=lang_opt, config=config_opt).strip()
 
@@ -153,10 +156,10 @@ if __name__=='__main__':
 
                 txt = process.extractOne(txt, fuzz_tam,scorer=fuzz.ratio)[0]
             elif r[3] == 'forenm' :
-                if (len(txt) > 1):
+                try:
                     print(txt)
                     txt = process.extractOne(txt, fuzz_fore,scorer=fuzz.ratio, score_cutoff=20)[0]
-                else:
+                except:
                     txt = ""
             else:
                 txt = re.sub("[ ]*|","",txt)
@@ -166,6 +169,6 @@ if __name__=='__main__':
     mydata = dict(mydata)
     print(mydata)
     cv2.imshow("block",imgshow)
-    cv2.imwrite("imgs/imgshow.png", imgshow)
+    cv2.imwrite("imgs/sample_img.png", imgshow)
     cv2.waitKey(0)
 
