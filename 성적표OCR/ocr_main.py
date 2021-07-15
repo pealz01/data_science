@@ -56,55 +56,53 @@ fuzz_mat = ['확률과 통계', '미적분', '기하']
 fuzz_tam = ['한국지리', '세계지리', '세계사', '동아시아사', '경제', '정치와 법', '사회･문화', '생활과 윤리', '윤리와 사상', '물리학Ⅰ', '화학Ⅰ', '생명과학Ⅰ', '지구과학Ⅰ', '물리학Ⅱ', '화학Ⅱ', '생명과학Ⅱ', '지구과학Ⅱ', '성공적인 직업 생활', '농업 기초 기술', '공업 일반', '상업 경제', '수산·해운 산업 기초', '인간 발달']
 fuzz_fore = ['독일어Ⅰ', '프랑스어Ⅰ', '스페인어Ⅰ', '중국어Ⅰ', '일본어Ⅰ', '러시아어Ⅰ', '아랍어Ⅰ', '베트남어Ⅰ', '한문Ⅰ']
 
-#워터마크 제거
+#워터마크 제거 참조 - https://answer-id.com/ko/61913147
 def back_rm(img):
-    # Load the image
-
-    # Convert the image to grayscale
+    # 그레이스케일로 변화
     gr = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Make a copy of the grayscale image
+    # 그레이스케일 이미지 copy
     bg = gr.copy()
 
-    # Apply morphological transformations
-    for i in range(5):
+    # 워터마크 morphological transformations
+    for i in range(6):
         kernel2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
                                             (2 * i + 1, 2 * i + 1))
         bg = cv2.morphologyEx(bg, cv2.MORPH_CLOSE, kernel2)
         bg = cv2.morphologyEx(bg, cv2.MORPH_OPEN, kernel2)
-
-    # Subtract the grayscale image from its processed copy
+    cv2.imwrite("imgs/bg.png", bg)
+    # 그레이스케일 이미지에서 워터마크 subtract
     dif = cv2.subtract(bg, gr)
-
-    # Apply thresholding
+    cv2.imwrite("imgs/dif.png",dif)
+    # dif, bg 이미지 threshold
     bw = cv2.threshold(dif, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
     dark = cv2.threshold(bg, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
 
-    # Extract pixels in the dark region
+    # dark 이미지 내 검은 부분 gr 이미지에서 추출해서 Threshold로 0으로 바꾸기
     darkpix = gr[np.where(dark > 0)]
-
-    # Threshold the dark region to get the darker pixels inside it
     darkpix = cv2.threshold(darkpix, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-
-    # Paste the extracted darker pixels in the watermark region
     bw[np.where(dark > 0)] = darkpix.T
+    cv2.imwrite("imgs/bw.png", bw)
 
-    #참조 - https://pythonq.com/so/python/1756300
+    # 이미지에 지정된 필터 마스크 이용해서 필터 먹이기
+    # 참조 - https://pythonq.com/so/python/1756300
     sharpen_kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
-    sharpen = cv2.filter2D(bw, -1, sharpen_kernel)
-    return sharpen
+    dst = cv2.filter2D(bw, -1, sharpen_kernel)
+    return dst
 
 
 
 if __name__=='__main__':
     mydata=[]
-    path ='경로입력'
+    path ='img/samp_img.png'
     img = cv2.imread(path)
     imgtbl = get_table(img)
     imgtbl_trash = back_rm(imgtbl)
     imgshow = imgtbl.copy()
     imgmask = np.zeros_like(imgtbl)
     mydata = []
+
+    cv2.imwrite("imgs/imgtbl_trash.png", imgtbl_trash)
     for x, r in enumerate(roi):
         txt = None
         cv2.rectangle(imgmask, (r[0][0],r[0][1]),(r[1][0],r[1][1]),(0,255,0),cv2.FILLED)
@@ -135,8 +133,9 @@ if __name__=='__main__':
                 cv2.drawContours(opening, [c], -1, (0, 0, 0), -1)
         result = cv2.bitwise_xor(imgcrop, opening)
 
-        txt =pytesseract.image_to_string(result,lang=lang_opt, config=config_opt).strip()
+        txt = pytesseract.image_to_string(result,lang=lang_opt, config=config_opt).strip()
 
+        #txt 내 결과 토대로 비슷한 단어 찾기
         if txt is not None:
             if r[3] == 'area':
                 txt =  process.extractOne(txt, fuzz_area, scorer=fuzz.ratio)[0]
@@ -167,5 +166,6 @@ if __name__=='__main__':
     mydata = dict(mydata)
     print(mydata)
     cv2.imshow("block",imgshow)
+    cv2.imwrite("imgs/imgshow.png", imgshow)
     cv2.waitKey(0)
 

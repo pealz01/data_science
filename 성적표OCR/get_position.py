@@ -28,7 +28,7 @@ def mousepoints(event,x,y,flags,params):
         circles.append([x,y,mycolor])
         counter2 +=1
 
-img =  cv2.imread('경로입력')
+img =  cv2.imread('imgs/samp_img.png')
 #simg = cv2.resize(img,(0, 0), None, scale, scale)
 grayA = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
